@@ -1,9 +1,11 @@
 //http module 
 const http = require('http');
+require('./config/dbConnect'); // Import the database connection file
+//dotenv for environment variables
+require('dotenv').config();
+
 //app import
 const app = require('./app/app');
-//require the daConnect file from the Config Folder
-require ("./config/dbConnect");
 
 //create a port 
 const PORT = process.env.PORT || 2020;
