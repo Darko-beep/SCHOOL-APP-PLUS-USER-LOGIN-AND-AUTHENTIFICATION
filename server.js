@@ -10,6 +10,9 @@ const app = express();
 //create a port 
 const PORT = process.env.PORT || 2020;
 
+//morgan middleware for logging requests
+app.use(morgan('dev'));
+
 
 //server 
 app.listen(PORT, () => {
