@@ -1,21 +1,20 @@
-
-//express 
-const express = require('express');
-//morgan
-const morgan = require('morgan');
-
-// create an instance of express
-const app = express();
+//http module 
+const http = require('http');
+//app import
+const app = require('./app/app');
 
 //create a port 
 const PORT = process.env.PORT || 2020;
 
-//morgan middleware for logging requests
-app.use(morgan('dev'));
+// //morgan middleware for logging requests
+// app.use(morgan('dev'));
+
+// create an advanced server using http module
+const server =http.createServer(app);
 
 
 //server 
-app.listen(PORT, () => {
+server.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });
 
