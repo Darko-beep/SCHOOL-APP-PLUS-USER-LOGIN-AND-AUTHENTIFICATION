@@ -10,7 +10,7 @@ const {
   adminUnWithdrawTeacherCtrl,
   adminWithdrawTeacherCtrl,
   deleteAdminCtrl,
-  getAdminCtrl,
+  getAdminProfileCtrl,
   getAdminsCtrl,
   loginAdminCtrl,
   updateAdminCtrl,
@@ -27,11 +27,11 @@ adminRouter.post("/register", registerAdmCtrl);
 adminRouter.post("/login", loginAdminCtrl);
 
 //get all
-adminRouter.get("/", getAdminsCtrl);
+adminRouter.get("/",isLogin, getAdminsCtrl);
 
 //single
 
-adminRouter.get("/:id", isLogin, getAdminCtrl);
+adminRouter.get("/profile", isLogin, getAdminProfileCtrl);
 
 //update
 adminRouter.put("/:id", updateAdminCtrl);

@@ -15,16 +15,16 @@ app.use(morgan("dev"));
 app.use (express.json()); // Parse JSON bodies
 
 
-app.use((req, res, next) => {
-  console.log(`${req.method} ${req.originalUrl}`);
-  next();
-});
+// app.use((req, res, next) => {
+//   console.log(`${req.method} ${req.originalUrl}`);
+//   next();
+// });
 
-let user = {
-  name: "John Does",
-  isAdmin: false,
-  isLogin: true,
-};
+// let user = {
+//   name: "John Does",
+//   isAdmin: false,
+//   isLogin: true,
+// };
 
 // const isLogin = (req, res, next) => {
 //   if (user.isLogin) {

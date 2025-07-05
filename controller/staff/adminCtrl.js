@@ -2,6 +2,10 @@ const AsyncHandler = require("express-async-handler");
 const Admin = require("../../models/Staff/Admin");
 const generateToken = require("../../utils/generateToken");
 const verifyToken = require("../../utils/verifyToken");
+const AcademicYear = require("../../models/Academic/AcademicYear");
+
+
+
 
 //@desc Register admin
 //@route POST /api/admins/register
@@ -23,6 +27,7 @@ exports.registerAdmCtrl = AsyncHandler(async (req, res) => {
     res.status(201).json({
       status: "success",
       data: user,
+      message: "Admin registered successfully",
     });
   } catch (error) {
     res.json({
@@ -46,11 +51,8 @@ exports.loginAdminCtrl = AsyncHandler(async (req, res) => {
     return res.json({ message: "Invliad login crendentials" });
   }
   if (user && (await user.verifyPassword(password))) {
-    const token = generateToken(user._id);
 
-    const verify = verifyToken(token);
-
-    return res.json({ data: generateToken(user._id), user, verify });
+    return res.json({ data: generateToken(user._id), message:"Login successful" });
   } else {
     return res.json({ message: "Invliad login crendentials" });
   }
@@ -63,37 +65,44 @@ exports.loginAdminCtrl = AsyncHandler(async (req, res) => {
 //@route    GET /api/v1/admins
 //@access   Private
 
-exports.getAdminsCtrl = (req, res) => {
-  try {
-    res.status(201).json({
-      status: "success",
-      data: "All admins",
-    });
-  } catch (error) {
-    res.json({
-      status: "failed",
-      error: error.message,
-    });
-  }
-};
+exports.getAdminsCtrl = AsyncHandler(async (req, res) => {
+
+  const admins = await Admin.find();
+  res.status(200).json({
+    status: "success",
+    message: "Admin fetched successfully",
+    data: admins,
+  });
+});
+
+
+
+  
+
 //@desc     Get single admin
 //@route    GET /api/v1/admins/:id
 //@access   Private
 
-exports.getAdminCtrl = (req, res) => {
-  try {
-    console.log(req.userAuth);
-    res.status(201).json({
+
+exports.getAdminProfileCtrl = AsyncHandler(async(req, res) => {
+ 
+ const admin = await Admin.findById(req.userAuth._id)
+    .select("-password -createdAt -updatedAt")
+    .populate("academicYears");
+  if (!admin) {
+    throw new Error("Admin Not Found");
+  } else {
+    res.status(200).json({
       status: "success",
-      data: "single admin",
-    });
-  } catch (error) {
-    res.json({
-      status: "failed",
-      error: error.message,
+      data: admin,
+      message: "Admin Profile fetched  successfully",
     });
   }
-};
+});
+
+
+
+
 //@desc    update admin
 //@route    UPDATE /api/v1/admins/:id
 //@access   Private
