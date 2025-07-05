@@ -1,4 +1,10 @@
 const express = require("express");
+//ADMIN MODEL IMPORT 
+const Admin = require("../models/Staff/Admin");
+const {
+  globalErrHandler,
+  notFoundErr,
+} = require("../middlewares/globalErrHandler");
 const morgan = require("morgan");
 const adminRouter = require("../routes/staff/adminRouter");
 
@@ -20,32 +26,37 @@ let user = {
   isLogin: true,
 };
 
-const isLogin = (req, res, next) => {
-  if (user.isLogin) {
-    next();
-  } else {
-    res.status(401).json({
-      msg: "Unauthorized",
-    });
-  }
-};
+// const isLogin = (req, res, next) => {
+//   if (user.isLogin) {
+//     next();
+//   } else {
+//     res.status(401).json({
+//       msg: "Unauthorized",
+//     });
+//   }
+// };
 
-const isAdmin = (req, res, next) => {
-  if (user.isAdmin) {
-    next();
-  } else {
-    res.status(401).json({
-      msg: "Unauthorized, you are not admin",
-    });
-  }
-};
+// const isAdmin = (req, res, next) => {
+//   if (user.isAdmin) {
+//     next();
+//   } else {
+//     res.status(401).json({
+//       msg: "Unauthorized, you are not admin",
+//     });
+//   }
+// };
 
-app.use(isLogin, isAdmin);
+// app.use(isLogin, isAdmin);
 
 
 
 //Routes
 //admin register
 app.use("/api/v1/admins", adminRouter);
+
+
+//Error middlewares
+app.use(notFoundErr);
+app.use(globalErrHandler);
 
 module.exports = app;

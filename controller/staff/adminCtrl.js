@@ -1,17 +1,19 @@
-
+const AsyncHandler = require("express-async-handler");
 const Admin = require("../../models/Staff/Admin");
+const generateToken = require("../../utils/generateToken");
+const verifyToken = require("../../utils/verifyToken");
 
 //@desc Register admin
 //@route POST /api/admins/register
 //@acess  Private
-exports.registerAdmCtrl = async (req, res) => {
+exports.registerAdmCtrl = AsyncHandler(async (req, res) => {
   const { name, email, password } = req.body;
   try {
     //Check if email exists
     const adminFound = await Admin.findOne({ email });
-    // if (adminFound) {
-    //   res.json("Admin Exists");
-    // }
+    if (adminFound) {
+      throw new Error("Admin Exists");
+    }
     //register
     const user = await Admin.create({
       name,
@@ -28,33 +30,32 @@ exports.registerAdmCtrl = async (req, res) => {
       error: error.message,
     });
   }
-};
+});
+
 
 
 //@desc     login admins
 //@route    POST /api/v1/admins/login
 //@access   Private
 
-exports.loginAdminCtrl = async (req, res) => {
+exports.loginAdminCtrl = AsyncHandler(async (req, res) => {
   const { email, password } = req.body;
-  try {
-    //find user
-    const user = await Admin.findOne({ email });
-    if (!user) {
-      return res.json({ message: "Invliad login crendentials" });
-    }
-    if (user && (await user.verifyPassword(password))) {
-      return res.json({ data: user });
-    } else {
-      return res.json({ message: "Invliad login crendentials" });
-    }
-  } catch (error) {
-    res.json({
-      status: "failed",
-      error: error.message,
-    });
+  //find user
+  const user = await Admin.findOne({ email });
+  if (!user) {
+    return res.json({ message: "Invliad login crendentials" });
   }
-};
+  if (user && (await user.verifyPassword(password))) {
+    const token = generateToken(user._id);
+
+    const verify = verifyToken(token);
+
+    return res.json({ data: generateToken(user._id), user, verify });
+  } else {
+    return res.json({ message: "Invliad login crendentials" });
+  }
+});
+
 
 
 
@@ -81,6 +82,7 @@ exports.getAdminsCtrl = (req, res) => {
 
 exports.getAdminCtrl = (req, res) => {
   try {
+    console.log(req.userAuth);
     res.status(201).json({
       status: "success",
       data: "single admin",
