@@ -3,6 +3,9 @@ const Admin = require("../../models/Staff/Admin");
 const generateToken = require("../../utils/generateToken");
 const verifyToken = require("../../utils/verifyToken");
 const AcademicYear = require("../../models/Academic/AcademicYear");
+//bcrypt
+const bcrypt = require("bcryptjs");
+const { hashPassword, isPassMatched } = require("../../utils/helpers");
 
 
 
@@ -12,50 +15,61 @@ const AcademicYear = require("../../models/Academic/AcademicYear");
 //@acess  Private
 exports.registerAdmCtrl = AsyncHandler(async (req, res) => {
   const { name, email, password } = req.body;
-  try {
+  // try {
     //Check if email exists
     const adminFound = await Admin.findOne({ email });
     if (adminFound) {
       throw new Error("Admin Exists");
     }
+
+
     //register
     const user = await Admin.create({
       name,
       email,
-      password,
+      password: await hashPassword(password),
     });
     res.status(201).json({
       status: "success",
       data: user,
       message: "Admin registered successfully",
     });
-  } catch (error) {
-    res.json({
-      status: "failed",
-      error: error.message,
-    });
   }
-});
+
+  // } catch (error) {
+  //   res.json({
+  //     status: "failed",
+  //     error: error.message,
+  //   });
+  // }
+);
 
 
 
 //@desc     login admins
 //@route    POST /api/v1/admins/login
 //@access   Private
-
 exports.loginAdminCtrl = AsyncHandler(async (req, res) => {
   const { email, password } = req.body;
   //find user
   const user = await Admin.findOne({ email });
   if (!user) {
-    return res.json({ message: "Invliad login crendentials" });
+    return res.json({ message: "Invalid login crendentials" });
   }
-  if (user && (await user.verifyPassword(password))) {
+  //verify password
+  //Hash password
 
-    return res.json({ data: generateToken(user._id), message:"Login successful" });
-  } else {
-    return res.json({ message: "Invliad login crendentials" });
+  const isMatched =  await isPassMatched(password, user.password);
+  if (!isMatched) {
+    return res.json({ message: "Invalid login crendentials" });
+  }else{
+     return res.json({
+      data: generateToken(user._id),
+      message: "Login successful"
+    }
+    );
   }
+
 });
 
 
@@ -106,19 +120,61 @@ exports.getAdminProfileCtrl = AsyncHandler(async(req, res) => {
 //@desc    update admin
 //@route    UPDATE /api/v1/admins/:id
 //@access   Private
-exports.updateAdminCtrl = (req, res) => {
-  try {
-    res.status(201).json({
+exports.updateAdminCtrl = AsyncHandler(async (req, res) => {
+  const { email, name, password } = req.body;
+  //if email is taken
+  const emailExist = await Admin.findOne({ email });
+  if (emailExist) {
+    throw new Error("This email is taken/exist");
+  }
+
+
+   //hash password
+  
+  //check if user is updating password
+
+  if (password) {
+    //update
+    const admin = await Admin.findByIdAndUpdate(
+      req.userAuth._id,
+      {
+        email,
+        password: await hashPassword(password),
+        name,
+      },
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
+    res.status(200).json({
       status: "success",
-      data: "update admin",
+      data: admin,
+      message: "Admin updated successfully",
     });
-  } catch (error) {
-    res.json({
-      status: "failed",
-      error: error.message,
+  } else {
+    //update
+    const admin = await Admin.findByIdAndUpdate(
+      req.userAuth._id,
+      {
+        email,
+        name,
+      },
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
+    res.status(200).json({
+      status: "success",
+      data: admin,
+      message: "Admin updated successfully",
     });
   }
-};
+});
+
+
+
 
 //@desc     Delete admin
 //@route    DELETE /api/v1/admins/:id

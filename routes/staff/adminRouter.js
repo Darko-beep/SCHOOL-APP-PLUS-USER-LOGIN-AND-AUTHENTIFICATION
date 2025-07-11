@@ -16,6 +16,9 @@ const {
   updateAdminCtrl,
 } = require("../../controller/staff/adminCtrl");
 const isLogin= require("../../middlewares/isLogin");
+const isAdmin = require("../../middlewares/isAdmin");
+ // Importing isAdmin middleware to ensure admin access
+
 
 
 const adminRouter = express.Router();
@@ -31,10 +34,10 @@ adminRouter.get("/",isLogin, getAdminsCtrl);
 
 //single
 
-adminRouter.get("/profile", isLogin, getAdminProfileCtrl);
+adminRouter.get("/profile", isLogin,  isAdmin,  getAdminProfileCtrl);
 
 //update
-adminRouter.put("/:id", updateAdminCtrl);
+adminRouter.put("/",isLogin,isAdmin, updateAdminCtrl);
 
 //delete
 adminRouter.delete("/:id", deleteAdminCtrl);
